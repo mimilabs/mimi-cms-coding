@@ -113,6 +113,11 @@ for file in Path(volumepath).rglob("icd10pcs_codes*"):
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC --DROP TABLE mimi_ws_1.cmscoding.hcpcs
+
+# COMMAND ----------
+
 volumepath = "/Volumes/mimi_ws_1/cmscoding/src/hcpcs/"
 for file in Path(volumepath).rglob("HCPC*.xls*"):
     if ("_changes" in file.name.lower() or 
@@ -129,6 +134,7 @@ for file in Path(volumepath).rglob("HCPC*.xls*"):
     mimi_dlt_load_date = datetime.today().date()
     data = []
     pdf = pd.read_excel(file, dtype=str, skiprows=skiprows_map.get(file.name, 0))
+    pdf["ASC_DT"] = pd.to_datetime(pdf["ASC_DT"]).dt.date
     pdf["ADD DT"] = pd.to_datetime(pdf["ADD DT"]).dt.date
     pdf["ACT EFF DT"] = pd.to_datetime(pdf["ACT EFF DT"]).dt.date
     pdf["TERM DT"] = pd.to_datetime(pdf["TERM DT"]).dt.date
@@ -136,6 +142,12 @@ for file in Path(volumepath).rglob("HCPC*.xls*"):
     pdf["mimi_src_file_date"] = mimi_src_file_date
     pdf["mimi_src_file_name"] = mimi_src_file_name
     pdf["mimi_dlt_load_date"] = mimi_dlt_load_date
+
+    pdf = pdf.drop(columns=['price3', 'price4', 'cim3',
+                      'labcert5', 'labcert6', 'labcert7', 'labcert8',
+                      'xref3', 'xref4', 'xref5',
+                      'opps', 'opps_pi', 'opps_dt', 'tos5'])
+
     df = spark.createDataFrame(pdf)
     (df.write.format("delta")
         .mode("overwrite")
