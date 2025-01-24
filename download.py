@@ -1,4 +1,12 @@
 # Databricks notebook source
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## ICD10
 
@@ -32,6 +40,10 @@ for a in soup.find_all('a', href=True):
 
 # COMMAND ----------
 
+pages = [x for x in pages if x.split('/')[-1].split('-')[0] > '2024']
+
+# COMMAND ----------
+
 for page in sorted(pages, reverse=True):
     prefix = page.split('/')[-1]
     response = requests.get(f"{url_base}{page}")
@@ -57,10 +69,6 @@ for page in sorted(pages, reverse=True):
 # COMMAND ----------
 
 page = "/medicare/coding-billing/healthcare-common-procedure-system/quarterly-update"
-
-# COMMAND ----------
-
-[a['href'] for a in soup.find_all('a', href=True) if "(ZIP)" in a.text]
 
 # COMMAND ----------
 
